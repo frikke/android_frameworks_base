@@ -25,21 +25,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Bitmap.Config;
-import android.graphics.PorterDuff.Mode;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.TypedValue;
 
+import androidx.core.graphics.ColorUtils;
+
 public class FadingBlockRenderer extends Renderer {
     //private static final int DEF_PAINT_ALPHA = (byte) 188;
     private static final int DBFUZZ = 2;
     private byte[] mFFTBytes;
     private Paint mPaint;
-    private Paint mFadePaint;
     private boolean mVertical;
     private boolean mLeftInLandscape;
     private FFTAverage[] mFFTAverage;
@@ -65,9 +64,6 @@ public class FadingBlockRenderer extends Renderer {
         super(context, handler, view, colorController);
         mObserver = new LegacySettingsObserver(handler);
         mPaint = new Paint();
-        mFadePaint = new Paint();
-        mFadePaint.setColor(Color.argb(200, 255, 255, 255));
-        mFadePaint.setXfermode(new PorterDuffXfermode(Mode.MULTIPLY));
         mMatrix = new Matrix();
         mObserver.updateSettings();
         mPaint.setAntiAlias(true);
@@ -125,7 +121,6 @@ public class FadingBlockRenderer extends Renderer {
             }
         }
         mCanvas.drawLines(mFFTPoints, mPaint);
-        mCanvas.drawPaint(mFadePaint);
         postInvalidate();
     }
 
@@ -171,19 +166,13 @@ public class FadingBlockRenderer extends Renderer {
 
     @Override
     public void onUpdateColor(int color) {
-        mPaint.setColor(color);
+        mPaint.setColor(ColorUtils.setAlphaComponent(color, 200));
     }
 
     @Override
     public void draw(Canvas canvas) {
         canvas.drawBitmap(mCanvasBitmap, mMatrix, null);
     }
-
-    /*private int applyPaintAlphaToColor(int color) {
-        int opaqueColor = Color.rgb(Color.red(color),
-                Color.green(color), Color.blue(color));
-        return (DEF_PAINT_ALPHA << 24) | (opaqueColor & 0x00ffffff);
-    }*/
 
     private class LegacySettingsObserver extends ContentObserver {
         public LegacySettingsObserver(Handler handler) {
