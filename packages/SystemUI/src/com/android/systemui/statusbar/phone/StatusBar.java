@@ -347,6 +347,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             "system:" + Settings.System.STOCK_STATUSBAR_IN_HIDE;
     private static final String NAVBAR_STYLE =
             "system:" + Settings.System.NAVBAR_STYLE;
+    private static final String BRIGHTNESS_SLIDER_STYLE =
+            "system:" + Settings.System.BRIGHTNESS_SLIDER_STYLE;
 
     private static final String BANNER_ACTION_CANCEL =
             "com.android.systemui.statusbar.banner_action_cancel";
@@ -682,6 +684,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mDarkStyle;
     private int mSwitchStyle;
     private int mNavbarStyle;
+    private int mBrightnessStyle;
     private boolean mPowerSave;
     private boolean mUseDarkTheme;
     private IOverlayManager mOverlayManager;
@@ -981,6 +984,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         tunerService.addTunable(this, DISPLAY_CUTOUT_MODE);
         tunerService.addTunable(this, STOCK_STATUSBAR_IN_HIDE);
         tunerService.addTunable(this, NAVBAR_STYLE);
+        tunerService.addTunable(this, BRIGHTNESS_SLIDER_STYLE);
     }
 
     // ================================================================================
@@ -3942,6 +3946,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         });
     }
 
+    private void updateBrightnessStyle() {
+        mUiOffloadThread.submit(() -> {
+            ThemeAccentUtils.setBrightnessStyle(mOverlayManager, mLockscreenUserManager.getCurrentUserId(), mBrightnessStyle);
+        });
+    }
+
     private void updateCorners() {
         if (mSysuiRoundedFwvals && !isCurrentRoundedSameAsFw()) {
             float density = Resources.getSystem().getDisplayMetrics().density;
@@ -5450,6 +5460,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (mNavbarStyle != navbarStyle) {
                     mNavbarStyle = navbarStyle;
                     updateNavbarStyle();
+                }
+                break;
+            case BRIGHTNESS_SLIDER_STYLE:
+                int brightnessStyle =
+                        TunerService.parseInteger(newValue, 0);
+                if (mBrightnessStyle != brightnessStyle) {
+                    mBrightnessStyle = brightnessStyle;
+                    updateBrightnessStyle();
                 }
                 break;
             default:

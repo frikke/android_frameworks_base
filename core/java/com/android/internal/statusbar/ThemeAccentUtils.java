@@ -103,6 +103,16 @@ public class ThemeAccentUtils {
         "com.android.system.navbar.tecno", //4
     };
 
+    // Brightness slider styles
+    public static final String[] BRIGHTNESS_STYLES = {
+        "com.android.system.brightness.stock", //0
+        "com.android.system.brightness.daniel", //1
+        "com.android.system.brightness.mememini", //2
+        "com.android.system.brightness.memeround", //3
+        "com.android.system.brightness.memeroundstroke", //4
+        "com.android.system.brightness.memestroke", //5
+    };
+
     // Check for the dark system theme
     public static int getDarkStyle(IOverlayManager om, int userId) {
         OverlayInfo themeInfo = null;
@@ -215,6 +225,29 @@ public class ThemeAccentUtils {
 
         try {
             om.setEnabled(NAVBAR_STYLES[navbarStyle], true, userId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    // Unloads the brightness slider styles
+    private static void unloadBrightnessStyle(IOverlayManager om, int userId) {
+        for (String style : BRIGHTNESS_STYLES) {
+            try {
+                om.setEnabled(style, false, userId);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    // Set brightness slider style
+    public static void setBrightnessStyle(IOverlayManager om, int userId, int brightnessStyle) {
+        // Always unload brightness slider styles
+        unloadBrightnessStyle(om, userId);
+
+        if (brightnessStyle == 0) return;
+
+        try {
+            om.setEnabled(BRIGHTNESS_STYLES[brightnessStyle], true, userId);
         } catch (RemoteException e) {
         }
     }
